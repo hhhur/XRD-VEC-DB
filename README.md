@@ -1,8 +1,10 @@
 # XRD-VEC DB: Physics-Informed Data Augmentation Module
 
-This repository contains the **physics-informed data augmentation module** for [XRD-VEC DB](https://github.com/xxx/xrd-vec-db), a million-scale structure-XRD paired database for geometric deep learning.
+> 🚀 **Note**: The dataset is currently being uploaded to Zenodo.
 
-> **Paper**: *A Foundational Geometric Deep Learning Benchmark for Crystallographic Structure-Spectrum Alignment*  
+This repository contains the **physics-informed data augmentation module** for [XRD-VEC DB](https://github.com/hhhur/XRD-VEC-DB?tab=readme-ov-file), a million-scale structure-XRD paired database for geometric deep learning.
+
+> **Paper**: *A Foundational Geometric Deep Learning Dataset for Crystallographic Structure-Spectrum Alignment*  
 > **Venue**: KDD 2026
 
 ## Overview
@@ -106,7 +108,7 @@ If you use this code, please cite:
 
 ```bibtex
 @inproceedings{xrdvecdb2026,
-  title={A Foundational Geometric Deep Learning Benchmark for Crystallographic Structure-Spectrum Alignment},
+  title={A Foundational Geometric Deep Learning Dataset for Crystallographic Structure-Spectrum Alignment},
   author={Su, Tianhao and Hu, Rui and Wu, Yue and Wang, Yin and Li, Musen and Hu, Shunbo},
   booktitle={Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
   year={2026}
@@ -118,3 +120,4 @@ If you use this code, please cite:
 1. Szymanski et al., "Probabilistic Deep Learning Approach to Automate the Interpretation of Multi-phase Diffraction Spectra," *Chem. Mater.*, 2021.
 2. Deng et al., "CHGNet as a pretrained universal neural network potential for charge-informed atomistic modelling," *Nat. Mach. Intell.*, 2023.
 3. Berendsen et al., "Molecular dynamics with coupling to an external bath," *J. Chem. Phys.*, 1984.
+
