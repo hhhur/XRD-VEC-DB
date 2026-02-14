@@ -1,6 +1,6 @@
 # XRD-VEC DB: Physics-Informed Data Augmentation Module
 
-> 🚀 **Note**: The dataset is currently being uploaded to Zenodo.
+> 🚀 Dataset Available: The dataset is now available on Hugging Face(https://huggingface.co/datasets/hhhuur/XRD_VEC).
 
 This repository contains the **physics-informed data augmentation module** for [XRD-VEC DB](https://github.com/hhhur/XRD-VEC-DB?tab=readme-ov-file), a million-scale structure-XRD paired database for geometric deep learning.
 
