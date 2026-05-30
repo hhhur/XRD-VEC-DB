@@ -1,6 +1,6 @@
 """
 CHGNet-based MD Data Augmentation for XRD Simulation
-多种系综下的分子动力学采样与XRD谱图计算
+Molecular-dynamics sampling and XRD calculation across ensembles.
 """
 
 import numpy as np
@@ -25,14 +25,14 @@ np.random.seed(42)
 
 
 def create_si_supercell(size=(2, 2, 2)):
-    """创建Si超胞"""
+    """Create a silicon supercell."""
     si = bulk('Si', 'diamond', a=5.43)
     si = si.repeat(size)
     return si
 
 
 def run_nvt_langevin(atoms, calc, temperature=300, steps=500, dt=1.0, friction=0.01):
-    """NVT系综 - Langevin恒温器"""
+    """Run an NVT ensemble with a Langevin thermostat."""
     atoms = atoms.copy()
     atoms.calc = calc
     MaxwellBoltzmannDistribution(atoms, temperature_K=temperature)
@@ -46,7 +46,7 @@ def run_nvt_langevin(atoms, calc, temperature=300, steps=500, dt=1.0, friction=0
 
 
 def run_nvt_berendsen(atoms, calc, temperature=300, steps=500, dt=1.0, taut=100):
-    """NVT系综 - Berendsen恒温器"""
+    """Run an NVT ensemble with a Berendsen thermostat."""
     atoms = atoms.copy()
     atoms.calc = calc
     MaxwellBoltzmannDistribution(atoms, temperature_K=temperature)
@@ -60,7 +60,7 @@ def run_nvt_berendsen(atoms, calc, temperature=300, steps=500, dt=1.0, taut=100)
 
 
 def run_npt_berendsen(atoms, calc, temperature=300, steps=500, dt=1.0, taut=100, pressure=1.01325):
-    """NPT系综 - Berendsen恒温恒压"""
+    """Run an NPT ensemble with Berendsen thermostatting and barostatting."""
     atoms = atoms.copy()
     atoms.calc = calc
     MaxwellBoltzmannDistribution(atoms, temperature_K=temperature)
@@ -79,17 +79,17 @@ def run_npt_berendsen(atoms, calc, temperature=300, steps=500, dt=1.0, taut=100,
 
 
 def ase_to_pymatgen(atoms):
-    """ASE Atoms转换为Pymatgen Structure"""
+    """Convert ASE Atoms to a pymatgen Structure."""
     return AseAtomsAdaptor.get_structure(atoms)
 
 
 def save_snapshots_as_cif(snapshots, ensemble_name, output_dir="si_structures"):
-    """将MD快照保存为CIF文件
+    """Save MD snapshots as CIF files.
 
     Args:
-        snapshots: ASE Atoms对象列表
-        ensemble_name: 系综名称 (用于文件命名)
-        output_dir: 输出目录
+        snapshots: List of ASE Atoms objects.
+        ensemble_name: Ensemble name used in file names.
+        output_dir: Output directory.
     """
     os.makedirs(output_dir, exist_ok=True)
     saved_files = []
@@ -104,14 +104,14 @@ def save_snapshots_as_cif(snapshots, ensemble_name, output_dir="si_structures"):
 
 
 def calculate_xrd_pattern(structure, two_theta_range=(10, 90)):
-    """计算XRD谱图"""
+    """Calculate an XRD pattern."""
     xrd_calc = XRDCalculator(wavelength='CuKa')
     pattern = xrd_calc.get_pattern(structure, two_theta_range=two_theta_range)
     return pattern.x, pattern.y
 
 
 def average_xrd_from_snapshots(snapshots, two_theta_range=(10, 90)):
-    """从多个快照计算平均XRD谱图"""
+    """Calculate an averaged XRD pattern from multiple snapshots."""
     all_patterns = []
     two_theta = None
 
@@ -127,7 +127,7 @@ def average_xrd_from_snapshots(snapshots, two_theta_range=(10, 90)):
 
 
 def broaden_pattern(two_theta, intensities, sigma=0.1, theta_min=10, theta_max=90):
-    """对XRD谱图进行高斯展宽"""
+    """Apply Gaussian broadening to an XRD pattern."""
     theta_fine = np.linspace(theta_min, theta_max, 1000)
     broadened = np.zeros_like(theta_fine)
     for t, i in zip(two_theta, intensities):
@@ -136,79 +136,66 @@ def broaden_pattern(two_theta, intensities, sigma=0.1, theta_min=10, theta_max=9
 
 
 def main():
-    """主函数：运行多种MD方法并比较XRD"""
+    """Run MD sampling routes and compare the resulting XRD patterns."""
     print("=" * 60)
-    print("CHGNet MD数据增广与XRD模拟")
+    print("CHGNet MD augmentation and XRD simulation")
     print("=" * 60)
 
-    # 创建Si超胞
-    print("\n[1] 创建Si超胞...")
+    print("\n[1] Creating Si supercell...")
     si_atoms = create_si_supercell(size=(2, 2, 2))
-    print(f"    原子数: {len(si_atoms)}")
+    print(f"    Number of atoms: {len(si_atoms)}")
 
-    # 加载CHGNet计算器
-    print("\n[2] 加载CHGNet模型...")
+    print("\n[2] Loading CHGNet model...")
     chgnet = CHGNet.load()
     calc = CHGNetCalculator(chgnet, use_device="cuda")
 
-    # 参数设置
     temperature = 300  # K
     steps = 400
     dt = 1.0  # fs
 
     results = {}
 
-    # 原始结构XRD
-    print("\n[3] 计算原始结构XRD...")
+    print("\n[3] Calculating XRD for the original structure...")
     orig_struct = ase_to_pymatgen(si_atoms)
     orig_x, orig_y = calculate_xrd_pattern(orig_struct)
     results['Original'] = (orig_x, orig_y)
 
-    # 保存原始结构
     output_dir = "si_structures"
     os.makedirs(output_dir, exist_ok=True)
     CifWriter(orig_struct).write_file(f"{output_dir}/Si_original.cif")
-    print(f"    已保存: {output_dir}/Si_original.cif")
+    print(f"    Saved: {output_dir}/Si_original.cif")
 
-    # NVT Langevin
-    print("\n[4] 运行NVT-Langevin MD...")
+    print("\n[4] Running NVT-Langevin MD...")
     snapshots_langevin = run_nvt_langevin(si_atoms, calc, temperature, steps, dt)
-    print(f"    采样构型数: {len(snapshots_langevin)}")
+    print(f"    Number of sampled structures: {len(snapshots_langevin)}")
     x_lang, y_lang = average_xrd_from_snapshots(snapshots_langevin)
     results['NVT-Langevin'] = (x_lang, y_lang)
-    # 保存NVT-Langevin快照
     cif_files = save_snapshots_as_cif(snapshots_langevin, "NVT-Langevin", output_dir)
-    print(f"    已保存 {len(cif_files)} 个CIF文件")
+    print(f"    Saved {len(cif_files)} CIF files")
 
-    # NVT Berendsen
-    print("\n[5] 运行NVT-Berendsen MD...")
+    print("\n[5] Running NVT-Berendsen MD...")
     snapshots_ber = run_nvt_berendsen(si_atoms, calc, temperature, steps, dt)
-    print(f"    采样构型数: {len(snapshots_ber)}")
+    print(f"    Number of sampled structures: {len(snapshots_ber)}")
     x_ber, y_ber = average_xrd_from_snapshots(snapshots_ber)
     results['NVT-Berendsen'] = (x_ber, y_ber)
-    # 保存NVT-Berendsen快照
     cif_files = save_snapshots_as_cif(snapshots_ber, "NVT-Berendsen", output_dir)
-    print(f"    已保存 {len(cif_files)} 个CIF文件")
+    print(f"    Saved {len(cif_files)} CIF files")
 
-    # NPT Berendsen
-    print("\n[6] 运行NPT-Berendsen MD...")
+    print("\n[6] Running NPT-Berendsen MD...")
     snapshots_npt = run_npt_berendsen(si_atoms, calc, temperature, steps, dt)
-    print(f"    采样构型数: {len(snapshots_npt)}")
+    print(f"    Number of sampled structures: {len(snapshots_npt)}")
     x_npt, y_npt = average_xrd_from_snapshots(snapshots_npt)
     results['NPT-Berendsen'] = (x_npt, y_npt)
-    # 保存NPT-Berendsen快照
     cif_files = save_snapshots_as_cif(snapshots_npt, "NPT-Berendsen", output_dir)
-    print(f"    已保存 {len(cif_files)} 个CIF文件")
+    print(f"    Saved {len(cif_files)} CIF files")
 
-    # 绘图
-    print("\n[7] 生成对比图...")
+    print("\n[7] Generating comparison plots...")
     import pandas as pd
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     colors = ['black', 'blue', 'red', 'green']
     labels = list(results.keys())
 
-    # 子图1: 原始结构
     ax1 = axes[0, 0]
     x, y = results['Original']
     x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -219,7 +206,6 @@ def main():
     ax1.set_xlim(10, 80)
     ax1.tick_params(axis='both', labelsize=11)
 
-    # 子图2: NVT-Langevin
     ax2 = axes[0, 1]
     x, y = results['NVT-Langevin']
     x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -230,7 +216,6 @@ def main():
     ax2.set_xlim(10, 80)
     ax2.tick_params(axis='both', labelsize=11)
 
-    # 子图3: NVT-Berendsen
     ax3 = axes[1, 0]
     x, y = results['NVT-Berendsen']
     x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -241,7 +226,6 @@ def main():
     ax3.set_xlim(10, 80)
     ax3.tick_params(axis='both', labelsize=11)
 
-    # 子图4: NPT-Berendsen
     ax4 = axes[1, 1]
     x, y = results['NPT-Berendsen']
     x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -256,9 +240,8 @@ def main():
     plt.tight_layout()
     plt.savefig(f'{output_dir}/si_xrd_md_comparison.png', dpi=150, bbox_inches='tight')
     plt.savefig(f'{output_dir}/si_xrd_md_comparison.pdf', bbox_inches='tight')
-    print(f"    图片已保存: {output_dir}/si_xrd_md_comparison.png/pdf")
+    print(f"    Saved: {output_dir}/si_xrd_md_comparison.png/pdf")
 
-    # 叠加对比图
     fig2, ax = plt.subplots(figsize=(10, 6))
     for i, (label, (x, y)) in enumerate(results.items()):
         x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -274,9 +257,8 @@ def main():
     plt.tight_layout()
     plt.savefig(f'{output_dir}/si_xrd_overlay.png', dpi=150, bbox_inches='tight')
     plt.savefig(f'{output_dir}/si_xrd_overlay.pdf', bbox_inches='tight')
-    print(f"    图片已保存: {output_dir}/si_xrd_overlay.png/pdf")
+    print(f"    Saved: {output_dir}/si_xrd_overlay.png/pdf")
 
-    # 保存CSV数据
     csv_data = {}
     for label, (x, y) in results.items():
         x_b, y_b = broaden_pattern(x, y, sigma=0.3)
@@ -284,17 +266,14 @@ def main():
         csv_data[f'{label}_intensity'] = y_b / y_b.max()
     df = pd.DataFrame(csv_data)
     df.to_csv(f'{output_dir}/si_xrd_md_data.csv', index=False)
-    print(f"    数据已保存: {output_dir}/si_xrd_md_data.csv")
+    print(f"    Saved: {output_dir}/si_xrd_md_data.csv")
 
-    # [8] 使用ASE绘制晶体结构
-    print("\n[8] 绘制晶体结构...")
+    print("\n[8] Drawing crystal structures...")
     from ase.io import write
 
-    # 绘制原始结构
     write(f'{output_dir}/Si_original_structure.png', si_atoms, rotation='10x,-10y')
-    print(f"    已保存: {output_dir}/Si_original_structure.png")
+    print(f"    Saved: {output_dir}/Si_original_structure.png")
 
-    # 绘制各系综的采样结构
     all_snapshots = {
         'NVT-Langevin': snapshots_langevin,
         'NVT-Berendsen': snapshots_ber,
@@ -304,10 +283,10 @@ def main():
         for i, atoms in enumerate(snapshots):
             img_path = f'{output_dir}/Si_{ensemble_name}_snapshot_{i:02d}.png'
             write(img_path, atoms, rotation='10x,-10y')
-        print(f"    已保存: {output_dir}/Si_{ensemble_name}_snapshot_*.png ({len(snapshots)}张)")
+        print(f"    Saved: {output_dir}/Si_{ensemble_name}_snapshot_*.png ({len(snapshots)} images)")
 
     print("\n" + "=" * 60)
-    print("完成!")
+    print("Done!")
     print("=" * 60)
 
 
