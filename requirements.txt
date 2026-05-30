@@ -1,0 +1,10 @@
+ase
+chgnet
+chromadb
+matplotlib
+numpy
+pandas
+pymatgen
+scipy
+sentence-transformers
+torch

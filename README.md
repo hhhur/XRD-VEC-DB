@@ -1,123 +1,127 @@
-# XRD-VEC DB: Physics-Informed Data Augmentation Module
+# XRD-VEC DB
 
-> 🚀 Dataset Available: The dataset is now available on Hugging Face(https://huggingface.co/datasets/hhhuur/XRD_VEC).
+Code and examples for **XRD-VEC_DB: A simulated crystal structure and X-ray
+diffraction dataset for materials research**.
 
-This repository contains the **physics-informed data augmentation module** for [XRD-VEC DB](https://github.com/hhhur/XRD-VEC-DB?tab=readme-ov-file), a million-scale structure-XRD paired database for geometric deep learning.
+The canonical dataset release is archived on Zenodo:
 
-> **Paper**: *A Foundational Geometric Deep Learning Dataset for Crystallographic Structure-Spectrum Alignment*  
-> **Status**: Work in Progress
+- DOI: https://doi.org/10.5281/zenodo.20389824
+- Version: v1
+- Publication date: 2026-05-26
+- Resource type: Dataset
+- Data license: CC BY 4.0
 
-## Overview
+Large database files are not stored in this GitHub repository. Download the
+Zenodo release to obtain the ASE structure databases, ChromaDB vector index,
+local embedding model, and the packaged query-system files.
 
-To bridge the domain gap between idealized computed XRD spectra and experimental measurements, we propose a **dual-augmentation framework** combining parametric transformations with molecular dynamics sampling.
+## Repository contents
 
-| Strategy | Physical Basis | Speed | Use Case |
-|----------|----------------|-------|----------|
-| **Parametric** | Phenomenological parameters | O(N), milliseconds | Large-scale augmentation |
-| **MD-based** | First-principles thermodynamics | O(N²), minutes | High-fidelity simulation |
+```text
+.
+├── noise/             # Parametric XRD perturbation utilities
+├── mlmd/              # CHGNet-based MD perturbation example for Si
+├── analysis/          # Reproducible Si augmentation examples and plots
+├── si_structures/     # Example Si snapshots and spectra used by analysis
+├── query_system/      # Lightweight query-system source and usage notes
+├── DATA_RECORDS.md    # Dataset file structure and identifier contract
+├── CITATION.cff       # Citation metadata
+├── LICENSE            # Apache-2.0 license for code in this repository
+└── requirements.txt   # Python dependencies
+```
 
-![Augmentation Comparison](noise/augmented_xrd.png)
+## Dataset layout after extraction
 
-## Parametric Augmentation (`noise/`)
+After downloading and extracting the Zenodo package, the reusable dataset is
+organized as a self-contained query and data package. The main data-bearing
+directories are:
 
-Simulates experimental artifacts based on standard crystallographic settings (Cu Kα, λ = 1.5406 Å, 2θ = 10°–90°):
+```text
+data/
+├── ase_databases/     # ASE SQLite crystal-structure databases
+├── vector_db/         # ChromaDB vector index
+└── model/             # Local all-mpnet-base-v2 embedding model
+```
 
-- **Peak Position Shifts**: Uniform shift (sample displacement, δ_max ≈ 0.5°) and non-uniform shift (lattice strain, ε_max ≤ 4%)
-- **Peak Broadening**: Scherrer equation with domain size D ~ U(5, 100) nm
-- **Preferred Orientation**: Texture factor with τ_max ∈ [0, 1]
-- **Background & Noise**: Chebyshev polynomial background + Gaussian noise (σ ≈ 0.25)
+The ChromaDB collection is named `merged_xrdselect`. Each indexed XRD record
+stores a 180-point normalized powder XRD vector and metadata keys:
 
-**Pipeline**: Texture → Shift → Broadening → Background → Noise
+- `source_db`: source database label, such as `result1` or `resultoqmd`
+- `id`: row identifier inside the corresponding ASE SQLite database
 
-## MD Augmentation (`mlmd/`)
-
-Captures intrinsic thermal effects using MLIP-driven (CHGNet) molecular dynamics:
-
-- **NVT-Langevin**: Stochastic heat bath coupling
-- **NVT-Berendsen**: Weak-coupling thermostat
-- **NPT-Berendsen**: Thermal expansion effects
-
-Generates physically self-consistent spectra with Debye-Waller factors and lattice dynamics.
+See [DATA_RECORDS.md](DATA_RECORDS.md) for the file-level description and
+source-database mapping.
 
 ## Installation
 
 ```bash
-# Core dependencies
-pip install numpy scipy matplotlib pymatgen
-
-# For MD augmentation (requires CUDA)
-pip install ase chgnet
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-## Quick Start
+Some workflows are optional. The MD example requires `chgnet` and a working
+PyTorch installation; GPU acceleration is recommended but not required by the
+dataset itself.
 
-### Parametric Augmentation
+## Query workflow
+
+The full Zenodo package includes shell wrappers and a pre-built local data
+layout. A typical workflow is:
+
+```bash
+cd XRD-VEC_DB
+python query_system/scripts/query_xrd.py \
+  --xrd "0.1,0.2,0.3,..." \
+  --top-k 5 \
+  --output output
+```
+
+The query script validates the 180-point input vector, embeds it with the local
+`all-mpnet-base-v2` model, searches the ChromaDB collection, retrieves matching
+structures from ASE databases using `source_db` and `id`, and exports CIF plus
+JSON metadata for each hit.
+
+## Augmentation examples
+
+Parametric perturbation:
 
 ```python
-from noise.xrd_augmentor import augment_xrd, XRDAugmentor, AugmentConfig
+from noise.xrd_augmentor import AugmentConfig, XRDAugmentor
 
-# One-line API with presets: 'mild', 'moderate', 'strong', 'experimental'
-spectrum = augment_xrd(angles, intensities, preset='moderate')
-
-# Custom configuration
-config = AugmentConfig(noise_std=0.3, max_shift=0.5, max_texture=0.6)
-aug = XRDAugmentor(config)
-spectrum = aug.augment(angles, intensities, hkls=miller_indices)
+config = AugmentConfig(noise_std=0.25, max_shift=0.5)
+augmentor = XRDAugmentor(config)
+augmented = augmentor.augment(angles, intensities, hkls=miller_indices)
 ```
 
-### From CIF File
+CHGNet-based molecular-dynamics example:
 
 ```bash
-python noise/demo_cif_augmentation.py path/to/structure.cif
+python mlmd/md_xrd_augmentation.py
 ```
 
-### MD Augmentation
-
-```bash
-python mlmd/md_xrd_augmentation.py  # Requires GPU
-```
-
-## Combined Pipeline
-
-For maximum physical fidelity, combine both strategies:
-
-```
-Structure → MD Sampling → Thermal Snapshots → XRD Calculation → Parametric Augmentation
-```
-
-This yields N_s × N_p unique training samples grounded in physical reality.
-
-## Project Structure
-
-```
-├── noise/                    # Parametric augmentation
-│   ├── xrd_augmentor.py      # Unified augmentor class
-│   ├── ceder_augmentation.py # Individual augmenters
-│   └── demo_cif_augmentation.py
-├── mlmd/                     # MD augmentation
-│   └── md_xrd_augmentation.py
-└── analysis/                 # Results and visualizations
-    ├── plots/
-    ├── structures/
-    └── data/
-```
+The included Si examples demonstrate NVT-Langevin, NVT-Berendsen, and
+NPT-Berendsen sampling at 300 K.
 
 ## Citation
 
-If you use this code, please cite:
+If you use the dataset, cite the Zenodo record and the accompanying Scientific
+Data descriptor:
 
 ```bibtex
-@unpublished{xrdvecdb2026,
-  title={A Foundational Geometric Deep Learning Dataset for Crystallographic Structure-Spectrum Alignment},
-  author={Su, Tianhao and Hu, Rui and Wu, Yue and Wang, Yin and Li, Musen and Hu, Shunbo},
-  note={Work in progress},
-  year={2026}
+@dataset{tianhao_su_2026_xrd_vec_db,
+  author       = {Tianhao, Su},
+  title        = {{XRD-VEC_DB: A simulated crystal structure and X-ray diffraction dataset for materials research}},
+  month        = may,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v1},
+  doi          = {10.5281/zenodo.20389824},
+  url          = {https://doi.org/10.5281/zenodo.20389824}
 }
 ```
 
-## References
+## Licenses
 
-1. Szymanski et al., "Probabilistic Deep Learning Approach to Automate the Interpretation of Multi-phase Diffraction Spectra," *Chem. Mater.*, 2021.
-2. Deng et al., "CHGNet as a pretrained universal neural network potential for charge-informed atomistic modelling," *Nat. Mach. Intell.*, 2023.
-3. Berendsen et al., "Molecular dynamics with coupling to an external bath," *J. Chem. Phys.*, 1984.
-
+- Data archived on Zenodo: CC BY 4.0
+- Code in this repository: Apache License 2.0

@@ -138,7 +138,7 @@ def broaden_pattern(two_theta, intensities, sigma=0.1, theta_min=10, theta_max=9
 def main():
     """主函数：运行多种MD方法并比较XRD"""
     print("=" * 60)
-    print("MACE MD数据增广与XRD模拟")
+    print("CHGNet MD数据增广与XRD模拟")
     print("=" * 60)
 
     # 创建Si超胞
@@ -252,7 +252,7 @@ def main():
     ax4.set_xlim(10, 80)
     ax4.tick_params(axis='both', labelsize=11)
 
-    plt.suptitle('Si XRD Patterns: MD Augmentation Comparison (MACE)', fontsize=14)
+    plt.suptitle('Si XRD Patterns: MD Augmentation Comparison (CHGNet)', fontsize=14)
     plt.tight_layout()
     plt.savefig(f'{output_dir}/si_xrd_md_comparison.png', dpi=150, bbox_inches='tight')
     plt.savefig(f'{output_dir}/si_xrd_md_comparison.pdf', bbox_inches='tight')
@@ -267,7 +267,7 @@ def main():
 
     ax.set_xlabel('2θ (degree)', fontsize=13)
     ax.set_ylabel('Intensity (a.u.) + offset', fontsize=13)
-    ax.set_title('Si XRD: MD Methods Comparison (MACE, 300K)', fontsize=14)
+    ax.set_title('Si XRD: MD Methods Comparison (CHGNet, 300K)', fontsize=14)
     ax.set_xlim(10, 80)
     ax.tick_params(axis='both', labelsize=11)
     ax.legend(loc='upper right', fontsize=11)

@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use XRD-VEC DB, please cite the Zenodo dataset and the accompanying Scientific Data descriptor."
+title: "XRD-VEC_DB: A simulated crystal structure and X-ray diffraction dataset for materials research"
+type: dataset
+authors:
+  - family-names: Su
+    given-names: Tianhao
+doi: 10.5281/zenodo.20389824
+url: "https://doi.org/10.5281/zenodo.20389824"
+version: "v1"
+date-released: "2026-05-26"
+repository-code: "https://github.com/hhhur/XRD-VEC-DB"
+license: CC-BY-4.0
