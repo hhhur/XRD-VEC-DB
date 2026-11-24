@@ -1,19 +1,17 @@
 # XRD-VEC DB
 
-Code and examples for **XRD-VEC_DB: A simulated crystal structure and X-ray
-diffraction dataset for materials research**.
+Code and examples for **XRD-VEC_DB: A simulated crystal structure and X-ray diffraction dataset for materials research**.
 
-The canonical dataset release is archived on Zenodo:
+The canonical dataset record is archived on Zenodo, and the full compliant v2.0 retrieval database (49.61 GB) is hosted on Hugging Face Datasets:
 
-- DOI: https://doi.org/10.5281/zenodo.20389824
-- Version: v1
-- Publication date: 2026-05-26
-- Resource type: Dataset
-- Data license: CC BY 4.0
+- **Zenodo DOI (v2.0)**: https://doi.org/10.5281/zenodo.24439338 (Concept DOI: https://doi.org/10.5281/zenodo.20389823)
+- **Full Dataset (Hugging Face)**: https://huggingface.co/datasets/hhhuur/XRD_VEC
+- **Version**: v2.0
+- **Publication date**: 2026-11-22
+- **Resource type**: Dataset
+- **Data license**: CC BY 4.0 (Code: Apache 2.0)
 
-Large database files are not stored in this GitHub repository. Download the
-Zenodo release to obtain the ASE structure databases, ChromaDB vector index,
-local embedding model, and the packaged query-system files.
+Large database files are not stored in this GitHub repository. Download the full v2.0 release from [Hugging Face](https://huggingface.co/datasets/hhhuur/XRD_VEC) to obtain the ChromaDB XRD vector index, local embedding model, open-source ASE structure databases, and packaged query-system files. To comply with third-party licensing restrictions, crystal structure coordinates from AFLOW and OQMD are not redistributed; instead, structure-free ID-only index databases (`oqmd.db`, `aflow.db`) and metadata tables are provided (also archived directly on Zenodo v2.0).
 
 ## Repository contents
 
