@@ -1,10 +1,11 @@
 # XRD-VEC DB data records
 
-This file describes the data layout used by the Zenodo v1 release:
-https://doi.org/10.5281/zenodo.20389824.
+This file describes the data layout used by the Zenodo v2.0 release:
+https://doi.org/10.5281/zenodo.24439338.
 
-The Zenodo archive stores the large data files. This GitHub repository stores
-code, examples, and documentation.
+The full 49.61 GB compliant v2.0 archive is hosted on Hugging Face Datasets at
+https://huggingface.co/datasets/hhhuur/XRD_VEC (and archived on Zenodo v2.0).
+This GitHub repository stores code, examples, and documentation.
 
 ## Top-level layout after extraction
 
@@ -47,6 +48,10 @@ The source label stored in ChromaDB maps to an ASE database file as follows.
 | result8 | allfile_8.db | 1792945 |
 | resultaflow | aflow.db | 59968 |
 | resultoqmd | oqmd.db | 913045 |
+
+
+
+> **v2.0 licensing compliance note:** In v2.0, AFLOW and OQMD crystal structures were replaced with structure-free ID-only index databases (`oqmd.db`, `aflow.db`) containing row IDs, formulas, and external identifiers (`structures_index` table) instead of atomic coordinates. The full 49.61 GB compliant archive is hosted at https://huggingface.co/datasets/hhhuur/XRD_VEC.
 
 ## Spectrum and vector-index records
 
