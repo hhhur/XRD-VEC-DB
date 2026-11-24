@@ -8,9 +8,6 @@ authors:
 doi: 10.5281/zenodo.24439338
 url: "https://doi.org/10.5281/zenodo.24439338"
 version: "v2.0"
-date-released: "2026-11-22"doi: 10.5281/zenodo.20389824
-url: "https://doi.org/10.5281/zenodo.20389824"
-version: "v1"
-date-released: "2026-05-26"
+date-released: "2026-11-22"
 repository-code: "https://github.com/hhhur/XRD-VEC-DB"
 license: CC-BY-4.0
