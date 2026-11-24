@@ -116,3 +116,11 @@ Data descriptor:
   version      = {v2.0},
   doi          = {10.5281/zenodo.24439338},
   url          = {https://doi.org/10.5281/zenodo.24439338}
+
+}
+```
+
+## Licenses
+
+- Data archived on Zenodo: CC BY 4.0
+- Code in this repository: Apache License 2.0
