@@ -5,7 +5,10 @@ type: dataset
 authors:
   - family-names: Su
     given-names: Tianhao
-doi: 10.5281/zenodo.20389824
+doi: 10.5281/zenodo.24439338
+url: "https://doi.org/10.5281/zenodo.24439338"
+version: "v2.0"
+date-released: "2026-11-22"doi: 10.5281/zenodo.20389824
 url: "https://doi.org/10.5281/zenodo.20389824"
 version: "v1"
 date-released: "2026-05-26"
